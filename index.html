@@ -1,0 +1,1405 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>java.aws — Modern AWS patterns for Java developers</title>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;700;800;900&family=DM+Sans:ital,wght@0,400;0,500;1,400&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg:#06090f;--bg2:#0c1018;--card:#0f1520;--card-border:#1a2235;
+    --old-bg:#150e0e;--old-border:#3a1a1a;--new-bg:#0a1a10;--new-border:#1a3a22;
+    --text:#e8edf5;--text-muted:#6b7a96;--text-dim:#3a4a65;
+    --aws:#FF9900;--aws-dim:rgba(255,153,0,0.12);
+    --modern:#00c97a;--old-color:#ff5f5f;
+    --code-old:#1a0e0e;--code-new:#0a1510;
+    --badge-sdk:rgba(255,153,0,0.15);--badge-lambda:rgba(146,91,255,0.15);
+    --badge-s3:rgba(0,168,255,0.15);--badge-dynamo:rgba(0,201,122,0.15);
+    --badge-sqs:rgba(255,182,0,0.15);--badge-iam:rgba(255,95,95,0.15);
+    --badge-obs:rgba(64,200,255,0.15);--badge-spring:rgba(100,220,100,0.15);
+    --badge-secrets:rgba(255,120,180,0.15);--badge-sns:rgba(200,120,255,0.15);
+    --badge-eb:rgba(255,200,80,0.15);--badge-bedrock:rgba(80,200,255,0.15);
+  }
+  [data-theme="light"] {
+    --bg:#f4f6fa;--card:#ffffff;--card-border:#d8e0ef;
+    --old-bg:#fff5f5;--old-border:#ffd0d0;--new-bg:#f0fff6;--new-border:#b8e8cc;
+    --text:#1a2235;--text-muted:#5a6a86;--text-dim:#a0afc0;
+    --code-old:#fff0f0;--code-new:#f0faf5;
+  }
+  *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+  body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);min-height:100vh;line-height:1.6}
+  header{border-bottom:1px solid var(--card-border);background:var(--bg);position:sticky;top:0;z-index:100;backdrop-filter:blur(12px)}
+  .header-inner{max-width:1400px;margin:0 auto;padding:0 2rem;height:64px;display:flex;align-items:center;justify-content:space-between;gap:1rem}
+  .brand{font-family:'JetBrains Mono',monospace;font-size:1.1rem;font-weight:600;text-decoration:none;color:var(--text)}
+  .brand-java{color:var(--text-muted)}.brand-dot{color:var(--text-dim)}.brand-aws{color:var(--aws)}
+  .header-right{display:flex;align-items:center;gap:1rem}
+  .theme-btn{background:var(--card);border:1px solid var(--card-border);color:var(--text-muted);border-radius:8px;padding:6px 12px;cursor:pointer;font-size:0.85rem;font-family:'JetBrains Mono',monospace;transition:all 0.2s}
+  .theme-btn:hover{border-color:var(--aws);color:var(--aws)}
+  .count-badge{background:var(--aws-dim);color:var(--aws);border:1px solid rgba(255,153,0,0.25);border-radius:20px;padding:4px 12px;font-size:0.8rem;font-family:'JetBrains Mono',monospace;font-weight:600}
+  .hero{max-width:1400px;margin:0 auto;padding:4rem 2rem 2rem;text-align:center}
+  .hero-eyebrow{font-family:'JetBrains Mono',monospace;font-size:0.75rem;letter-spacing:0.15em;color:var(--aws);text-transform:uppercase;margin-bottom:1.2rem}
+  .hero-title{font-family:'Syne',sans-serif;font-size:clamp(2rem,5vw,3.5rem);font-weight:900;line-height:1.1;letter-spacing:-0.03em;margin-bottom:1rem}
+  .hero-title span{color:var(--aws)}
+  .hero-sub{font-size:1.05rem;color:var(--text-muted);max-width:560px;margin:0 auto 2.5rem;line-height:1.7}
+  .stats{display:flex;justify-content:center;gap:2.5rem;margin-bottom:3rem;flex-wrap:wrap}
+  .stat{text-align:center}
+  .stat-num{font-family:'Syne',sans-serif;font-size:2rem;font-weight:900;color:var(--aws);line-height:1}
+  .stat-label{font-size:0.78rem;color:var(--text-muted);text-transform:uppercase;letter-spacing:0.08em;margin-top:4px}
+  .controls{max-width:1400px;margin:0 auto 2rem;padding:0 2rem;display:flex;flex-direction:column;gap:1rem}
+  .search-wrap{position:relative}
+  .search-icon{position:absolute;left:14px;top:50%;transform:translateY(-50%);color:var(--text-dim);font-size:0.9rem;pointer-events:none;font-family:'JetBrains Mono',monospace}
+  .search-input{width:100%;max-width:480px;background:var(--card);border:1px solid var(--card-border);border-radius:10px;padding:10px 14px 10px 38px;color:var(--text);font-size:0.9rem;font-family:'DM Sans',sans-serif;outline:none;transition:all 0.2s}
+  .search-input::placeholder{color:var(--text-dim)}
+  .search-input:focus{border-color:var(--aws);box-shadow:0 0 0 3px var(--aws-dim)}
+  .filters{display:flex;gap:0.5rem;flex-wrap:wrap}
+  .filter-btn{background:var(--card);border:1px solid var(--card-border);color:var(--text-muted);border-radius:20px;padding:6px 16px;font-size:0.82rem;cursor:pointer;transition:all 0.2s;font-family:'DM Sans',sans-serif;font-weight:500}
+  .filter-btn:hover{border-color:var(--aws);color:var(--aws)}
+  .filter-btn.active{background:var(--aws-dim);border-color:var(--aws);color:var(--aws);font-weight:600}
+  .grid{max-width:1400px;margin:0 auto;padding:0 2rem 4rem;display:grid;grid-template-columns:repeat(auto-fill,minmax(620px,1fr));gap:1.25rem}
+  @media(max-width:700px){.grid{grid-template-columns:1fr;padding:0 1rem 3rem}.hero{padding:2.5rem 1rem 1.5rem}.controls{padding:0 1rem}.header-inner{padding:0 1rem}}
+  .section-label{grid-column:1/-1;display:flex;align-items:center;gap:1rem;padding:0.5rem 0;margin-top:0.5rem}
+  .section-label-text{font-family:'Syne',sans-serif;font-weight:800;font-size:0.8rem;text-transform:uppercase;letter-spacing:0.12em;color:var(--text-dim);white-space:nowrap}
+  .section-label-line{flex:1;height:1px;background:var(--card-border)}
+  .card{background:var(--card);border:1px solid var(--card-border);border-radius:14px;overflow:hidden;transition:border-color 0.2s,transform 0.2s,box-shadow 0.2s}
+  .card:hover{border-color:rgba(255,153,0,0.35);transform:translateY(-2px);box-shadow:0 8px 32px rgba(0,0,0,0.25)}
+  .card-header{padding:1rem 1.2rem 0.8rem;display:flex;align-items:flex-start;justify-content:space-between;gap:0.75rem}
+  .card-meta{display:flex;gap:0.5rem;align-items:center;flex-wrap:wrap}
+  .cat-badge{font-size:0.7rem;font-weight:600;padding:3px 9px;border-radius:20px;font-family:'JetBrains Mono',monospace;text-transform:uppercase;letter-spacing:0.05em}
+  .cat-SDK{background:var(--badge-sdk);color:var(--aws)}
+  .cat-Lambda{background:var(--badge-lambda);color:#9b6fff}
+  .cat-S3{background:var(--badge-s3);color:#00a8ff}
+  .cat-DynamoDB{background:var(--badge-dynamo);color:var(--modern)}
+  .cat-SQS{background:var(--badge-sqs);color:#ffb600}
+  .cat-IAM{background:var(--badge-iam);color:#ff5f5f}
+  .cat-Observability{background:var(--badge-obs);color:#40c8ff}
+  .cat-Spring{background:var(--badge-spring);color:#64dc64}
+  .cat-Secrets{background:var(--badge-secrets);color:#ff78b4}
+  .cat-SNS{background:var(--badge-sns);color:#c878ff}
+  .cat-EventBridge{background:var(--badge-eb);color:#ffc850}
+  .cat-Bedrock{background:var(--badge-bedrock);color:#50c8ff}
+  .sdk-tag{font-family:'JetBrains Mono',monospace;font-size:0.68rem;color:var(--text-dim);border:1px solid var(--card-border);padding:2px 8px;border-radius:4px}
+  .card-title{font-family:'Syne',sans-serif;font-size:0.95rem;font-weight:700;color:var(--text);line-height:1.3;text-align:right;flex-shrink:0;max-width:55%}
+  .code-split{display:grid;grid-template-columns:1fr 1fr}
+  .code-pane-label{display:flex;align-items:center;gap:0.4rem;padding:0.5rem 1rem;font-size:0.72rem;font-weight:600;font-family:'JetBrains Mono',monospace;letter-spacing:0.06em;text-transform:uppercase;border-top:1px solid var(--card-border)}
+  .code-pane.old .code-pane-label{background:var(--old-bg);color:var(--old-color);border-right:1px solid var(--old-border)}
+  .code-pane.new .code-pane-label{background:var(--new-bg);color:var(--modern)}
+  .code-pane.old pre{background:var(--code-old);border-right:1px solid var(--old-border)}
+  .code-pane.new pre{background:var(--code-new)}
+  pre{padding:1rem;font-family:'JetBrains Mono',monospace;font-size:0.72rem;line-height:1.65;overflow-x:auto;color:var(--text);min-height:100px}
+  .kw{color:#7eb8f7}.cl{color:#e8c56e}.fn{color:#82cfb0}.st{color:#c5a36e}.cm{color:var(--text-dim);font-style:italic}
+  .empty{grid-column:1/-1;text-align:center;padding:4rem 2rem;color:var(--text-muted)}
+  .empty-icon{font-size:2.5rem;margin-bottom:1rem;display:block}
+  footer{border-top:1px solid var(--card-border);text-align:center;padding:2rem;color:var(--text-dim);font-size:0.82rem;font-family:'JetBrains Mono',monospace}
+  footer a{color:var(--aws);text-decoration:none}
+</style>
+</head>
+<body>
+<header>
+  <div class="header-inner">
+    <a class="brand" href="#"><span class="brand-java">java</span><span class="brand-dot">.</span><span class="brand-aws">aws</span></a>
+    <div class="header-right">
+      <span class="count-badge" id="count-badge">44 patterns</span>
+      <button class="theme-btn" onclick="toggleTheme()" id="theme-btn">☀ light</button>
+    </div>
+  </div>
+</header>
+
+<section class="hero">
+  <p class="hero-eyebrow">AWS SDK v1 → v2 · Modern Java · Cloud-native · 2026</p>
+  <h1 class="hero-title">AWS Java has evolved.<br><span>Your code can too.</span></h1>
+  <p class="hero-sub">Every legacy AWS Java pattern next to its modern replacement — side by side. SDK v2, App Signals, SnapStart, Bedrock, and beyond.</p>
+  <div class="stats">
+    <div class="stat"><div class="stat-num">44</div><div class="stat-label">Patterns</div></div>
+    <div class="stat"><div class="stat-num">12</div><div class="stat-label">Categories</div></div>
+    <div class="stat"><div class="stat-num">v2</div><div class="stat-label">SDK Target</div></div>
+    <div class="stat"><div class="stat-num">SB4</div><div class="stat-label">Spring Boot</div></div>
+  </div>
+</section>
+
+<div class="controls">
+  <div class="search-wrap">
+    <span class="search-icon">⌕</span>
+    <input class="search-input" type="text" placeholder="Search patterns…" id="search" oninput="filterCards()">
+  </div>
+  <div class="filters">
+    <button class="filter-btn active" onclick="setFilter('All',this)">All</button>
+    <button class="filter-btn" onclick="setFilter('SDK',this)">SDK</button>
+    <button class="filter-btn" onclick="setFilter('IAM',this)">IAM</button>
+    <button class="filter-btn" onclick="setFilter('S3',this)">S3</button>
+    <button class="filter-btn" onclick="setFilter('DynamoDB',this)">DynamoDB</button>
+    <button class="filter-btn" onclick="setFilter('SQS',this)">SQS</button>
+    <button class="filter-btn" onclick="setFilter('SNS',this)">SNS</button>
+    <button class="filter-btn" onclick="setFilter('EventBridge',this)">EventBridge</button>
+    <button class="filter-btn" onclick="setFilter('Lambda',this)">Lambda</button>
+    <button class="filter-btn" onclick="setFilter('Secrets',this)">Secrets</button>
+    <button class="filter-btn" onclick="setFilter('Bedrock',this)">Bedrock</button>
+    <button class="filter-btn" onclick="setFilter('Observability',this)">Observability</button>
+    <button class="filter-btn" onclick="setFilter('Spring',this)">Spring</button>
+  </div>
+</div>
+
+<div class="grid" id="grid">
+
+<!-- SDK -->
+<div class="section-label" data-cat="SDK"><span class="section-label-text">SDK</span><div class="section-label-line"></div></div>
+
+<div class="card" data-cat="SDK" data-title="s3 client creation builder sdk v2">
+  <div class="card-header"><div class="card-meta"><span class="cat-badge cat-SDK">SDK</span><span class="sdk-tag">v1 → v2</span></div><div class="card-title">Client Creation</div></div>
+  <div class="code-split">
+    <div class="code-pane old"><div class="code-pane-label">✕ Old</div><pre><span class="kw">AmazonS3</span> s3 <span class="kw">=</span>
+  <span class="cl">AmazonS3ClientBuilder</span>
+    .<span class="fn">standard</span>()
+    .<span class="fn">withRegion</span>(
+      <span class="cl">Regions</span>.US_EAST_1)
+    .<span class="fn">withCredentials</span>(<span class="kw">new</span>
+      <span class="cl">DefaultAWSCredentials</span>
+      <span class="cl">ProviderChain</span>())
+    .<span class="fn">build</span>();</pre></div>
+    <div class="code-pane new"><div class="code-pane-label">✓ Modern</div><pre><span class="kw">S3Client</span> s3 <span class="kw">=</span>
+  <span class="cl">S3Client</span>.<span class="fn">builder</span>()
+    .<span class="fn">region</span>(
+      <span class="cl">Region</span>.US_EAST_1)
+    .<span class="fn">credentialsProvider</span>(
+      <span class="cl">DefaultCredentials</span>
+      <span class="cl">Provider</span>.<span class="fn">create</span>())
+    .<span class="fn">build</span>();</pre></div>
+  </div>
+</div>
+
+<div class="card" data-cat="SDK" data-title="pagination auto paginator list objects s3 dynamodb">
+  <div class="card-header"><div class="card-meta"><span class="cat-badge cat-SDK">SDK</span><span class="sdk-tag">Auto-paginator</span></div><div class="card-title">Pagination</div></div>
+  <div class="code-split">
+    <div class="code-pane old"><div class="code-pane-label">✕ Old (manual token loop)</div><pre><span class="kw">String</span> token <span class="kw">=</span> <span class="kw">null</span>;
+<span class="cl">List</span>&lt;<span class="cl">S3ObjectSummary</span>&gt; all
+  <span class="kw">=</span> <span class="kw">new</span> <span class="cl">ArrayList</span>&lt;&gt;();
+<span class="kw">do</span> {
+  <span class="cl">ObjectListing</span> r <span class="kw">=</span>
+    s3.<span class="fn">listObjects</span>(<span class="kw">new</span>
+      <span class="cl">ListObjectsRequest</span>()
+      .<span class="fn">withBucketName</span>(b)
+      .<span class="fn">withMarker</span>(token));
+  all.<span class="fn">addAll</span>(
+    r.<span class="fn">getObjectSummaries</span>());
+  token <span class="kw">=</span> r.<span class="fn">getNextMarker</span>();
+} <span class="kw">while</span> (token <span class="kw">!=</span> <span class="kw">null</span>);</pre></div>
+    <div class="code-pane new"><div class="code-pane-label">✓ Modern (auto-paginator)</div><pre><span class="cm">// SDK v2 handles all pages</span>
+s3.<span class="fn">listObjectsV2Paginator</span>(
+    r <span class="kw">-></span> r.<span class="fn">bucket</span>(bucket))
+  .<span class="fn">contents</span>()
+  .<span class="fn">stream</span>()
+  .<span class="fn">forEach</span>(obj <span class="kw">-></span>
+    process(obj.<span class="fn">key</span>()));
+
+<span class="cm">// Works for DynamoDB, SQS,</span>
+<span class="cm">// CloudWatch... all APIs</span>
+<span class="cm">// Zero manual token code ✓</span></pre></div>
+  </div>
+</div>
+
+<div class="card" data-cat="SDK" data-title="async non-blocking client completablefuture netty">
+  <div class="card-header"><div class="card-meta"><span class="cat-badge cat-SDK">SDK</span><span class="sdk-tag">Async Client</span></div><div class="card-title">Async Non-blocking Client</div></div>
+  <div class="code-split">
+    <div class="code-pane old"><div class="code-pane-label">✕ Old (blocks thread)</div><pre><span class="cl">AmazonSQS</span> sqs <span class="kw">=</span>
+  <span class="cl">AmazonSQSClientBuilder</span>
+    .<span class="fn">defaultClient</span>();
+
+<span class="cm">// Thread blocked until done</span>
+<span class="cl">SendMessageResult</span> r <span class="kw">=</span>
+  sqs.<span class="fn">sendMessage</span>(
+    queueUrl, body);</pre></div>
+    <div class="code-pane new"><div class="code-pane-label">✓ Modern (non-blocking)</div><pre><span class="cl">SqsAsyncClient</span> sqs <span class="kw">=</span>
+  <span class="cl">SqsAsyncClient</span>.<span class="fn">create</span>();
+
+<span class="cl">CompletableFuture</span>&lt;...&gt; f <span class="kw">=</span>
+  sqs.<span class="fn">sendMessage</span>(r <span class="kw">-></span> r
+    .<span class="fn">queueUrl</span>(queueUrl)
+    .<span class="fn">messageBody</span>(body));
+
+f.<span class="fn">thenAccept</span>(
+  r <span class="kw">-></span> log(r.<span class="fn">messageId</span>()));
+<span class="cm">// Never blocks a thread ✓</span></pre></div>
+  </div>
+</div>
+
+<div class="card" data-cat="SDK" data-title="http client apache netty configuration timeout connections">
+  <div class="card-header"><div class="card-meta"><span class="cat-badge cat-SDK">SDK</span><span class="sdk-tag">HTTP Client Config</span></div><div class="card-title">HTTP Client Tuning</div></div>
+  <div class="code-split">
+    <div class="code-pane old"><div class="code-pane-label">✕ Old</div><pre><span class="cl">ClientConfiguration</span> cfg <span class="kw">=</span>
+  <span class="kw">new</span> <span class="cl">ClientConfiguration</span>()
+    .<span class="fn">withConnectionTimeout</span>(
+      5000)
+    .<span class="fn">withSocketTimeout</span>(
+      30000)
+    .<span class="fn">withMaxConnections</span>(50);
+
+<span class="cl">AmazonS3</span> s3 <span class="kw">=</span>
+  <span class="cl">AmazonS3ClientBuilder</span>
+    .<span class="fn">standard</span>()
+    .<span class="fn">withClientConfiguration</span>(
+      cfg).<span class="fn">build</span>();</pre></div>
+    <div class="code-pane new"><div class="code-pane-label">✓ Modern (typed, Duration)</div><pre><span class="cl">S3Client</span> s3 <span class="kw">=</span>
+  <span class="cl">S3Client</span>.<span class="fn">builder</span>()
+    .<span class="fn">httpClientBuilder</span>(
+      <span class="cl">ApacheHttpClient</span>
+        .<span class="fn">builder</span>()
+        .<span class="fn">maxConnections</span>(50)
+        .<span class="fn">connectionTimeout</span>(
+          <span class="cl">Duration</span>
+            .<span class="fn">ofSeconds</span>(5))
+        .<span class="fn">socketTimeout</span>(
+          <span class="cl">Duration</span>
+            .<span class="fn">ofSeconds</span>(30)))
+    .<span class="fn">build</span>();</pre></div>
+  </div>
+</div>
+
+<div class="card" data-cat="SDK" data-title="exception handling awsserviceexception s3exception sdk">
+  <div class="card-header"><div class="card-meta"><span class="cat-badge cat-SDK">SDK</span><span class="sdk-tag">v1 → v2</span></div><div class="card-title">Exception Handling</div></div>
+  <div class="code-split">
+    <div class="code-pane old"><div class="code-pane-label">✕ Old</div><pre><span class="kw">try</span> {
+  s3.<span class="fn">putObject</span>(bucket,key,f);
+} <span class="kw">catch</span> (
+  <span class="cl">AmazonServiceException</span> e) {
+  log(e.<span class="fn">getErrorCode</span>());
+  log(e.<span class="fn">getStatusCode</span>());
+} <span class="kw">catch</span> (
+  <span class="cl">AmazonClientException</span> e) {
+  log(e.<span class="fn">getMessage</span>());
+}</pre></div>
+    <div class="code-pane new"><div class="code-pane-label">✓ Modern</div><pre><span class="kw">try</span> {
+  s3.<span class="fn">putObject</span>(req, body);
+} <span class="kw">catch</span> (
+  <span class="cl">S3Exception</span> e) {
+  <span class="cm">// service-specific subclass</span>
+  log(e.<span class="fn">awsErrorDetails</span>()
+       .<span class="fn">errorCode</span>());
+  log(e.<span class="fn">statusCode</span>());
+} <span class="kw">catch</span> (
+  <span class="cl">SdkException</span> e) {
+  log(e.<span class="fn">getMessage</span>());
+}</pre></div>
+  </div>
+</div>
+
+<!-- IAM -->
+<div class="section-label" data-cat="IAM"><span class="section-label-text">IAM</span><div class="section-label-line"></div></div>
+
+<div class="card" data-cat="IAM" data-title="credentials hardcoded static provider chain imds ecs">
+  <div class="card-header"><div class="card-meta"><span class="cat-badge cat-IAM">IAM</span><span class="sdk-tag">Security</span></div><div class="card-title">Credentials Provider</div></div>
+  <div class="code-split">
+    <div class="code-pane old"><div class="code-pane-label">✕ Old (hardcoded ⚠️)</div><pre><span class="cl">BasicAWSCredentials</span> creds <span class="kw">=</span>
+  <span class="kw">new</span> <span class="cl">BasicAWSCredentials</span>(
+    <span class="st">"AKIAIOSFODNN7EXAMPLE"</span>,
+    <span class="st">"wJalrXUtnFEMI..."</span>);
+
+<span class="cl">AmazonS3</span> s3 <span class="kw">=</span>
+  <span class="cl">AmazonS3ClientBuilder</span>
+    .<span class="fn">standard</span>()
+    .<span class="fn">withCredentials</span>(<span class="kw">new</span>
+      <span class="cl">AWSStaticCredentials</span>
+      <span class="cl">Provider</span>(creds))
+    .<span class="fn">build</span>();</pre></div>
+    <div class="code-pane new"><div class="code-pane-label">✓ Modern (chain, never hardcode)</div><pre><span class="cm">// Env → profile → container</span>
+<span class="cm">// → IMDSv2 → auto ✓</span>
+<span class="cl">S3Client</span> s3 <span class="kw">=</span>
+  <span class="cl">S3Client</span>.<span class="fn">builder</span>()
+    .<span class="fn">credentialsProvider</span>(
+      <span class="cl">DefaultCredentials</span>
+      <span class="cl">Provider</span>.<span class="fn">create</span>())
+    .<span class="fn">build</span>();
+<span class="cm">// ECS: IAM task role</span>
+<span class="cm">// EC2: Instance profile</span>
+<span class="cm">// Never commit secrets ✓</span></pre></div>
+  </div>
+</div>
+
+<div class="card" data-cat="IAM" data-title="assume role sts credentials auto refresh provider">
+  <div class="card-header"><div class="card-meta"><span class="cat-badge cat-IAM">IAM</span><span class="sdk-tag">STS</span></div><div class="card-title">Assume Role (auto-refresh)</div></div>
+  <div class="code-split">
+    <div class="code-pane old"><div class="code-pane-label">✕ Old (manual, no refresh)</div><pre><span class="cl">AWSSecurityTokenService</span> sts <span class="kw">=</span>
+  <span class="cl">AWSSecurityTokenService</span>
+  <span class="cl">ClientBuilder</span>.<span class="fn">standard</span>()
+  .<span class="fn">build</span>();
+
+<span class="cm">// Credentials expire in 1hr</span>
+<span class="cm">// You must handle refresh!</span>
+<span class="cl">Credentials</span> c <span class="kw">=</span>
+  sts.<span class="fn">assumeRole</span>(req)
+     .<span class="fn">getCredentials</span>();</pre></div>
+    <div class="code-pane new"><div class="code-pane-label">✓ Modern (auto-refreshing)</div><pre><span class="cl">StsAssumeRoleCredentials</span>
+  <span class="cl">Provider</span> p <span class="kw">=</span>
+  <span class="cl">StsAssumeRoleCredentials</span>
+  <span class="cl">Provider</span>.<span class="fn">builder</span>()
+    .<span class="fn">stsClient</span>(
+      <span class="cl">StsClient</span>.<span class="fn">create</span>())
+    .<span class="fn">refreshRequest</span>(r <span class="kw">-></span> r
+      .<span class="fn">roleArn</span>(roleArn)
+      .<span class="fn">roleSessionName</span>(
+        <span class="st">"session"</span>))
+    .<span class="fn">build</span>();
+<span class="cm">// Auto-refreshes before expiry ✓</span></pre></div>
+  </div>
+</div>
+
+<!-- S3 -->
+<div class="section-label" data-cat="S3"><span class="section-label-text">S3</span><div class="section-label-line"></div></div>
+
+<div class="card" data-cat="S3" data-title="upload put object s3 request body bytes">
+  <div class="card-header"><div class="card-meta"><span class="cat-badge cat-S3">S3</span><span class="sdk-tag">v1 → v2</span></div><div class="card-title">Upload Object</div></div>
+  <div class="code-split">
+    <div class="code-pane old"><div class="code-pane-label">✕ Old</div><pre><span class="cl">ObjectMetadata</span> meta <span class="kw">=</span>
+  <span class="kw">new</span> <span class="cl">ObjectMetadata</span>();
+meta.<span class="fn">setContentType</span>(
+  <span class="st">"application/json"</span>);
+meta.<span class="fn">setContentLength</span>(
+  bytes.length);
+
+s3.<span class="fn">putObject</span>(bucket, key,
+  <span class="kw">new</span> <span class="cl">ByteArrayInputStream</span>(
+    bytes), meta);</pre></div>
+    <div class="code-pane new"><div class="code-pane-label">✓ Modern</div><pre><span class="cl">PutObjectRequest</span> req <span class="kw">=</span>
+  <span class="cl">PutObjectRequest</span>.<span class="fn">builder</span>()
+    .<span class="fn">bucket</span>(bucket)
+    .<span class="fn">key</span>(key)
+    .<span class="fn">contentType</span>(
+      <span class="st">"application/json"</span>)
+    .<span class="fn">build</span>();
+
+s3.<span class="fn">putObject</span>(req,
+  <span class="cl">RequestBody</span>
+    .<span class="fn">fromBytes</span>(bytes));</pre></div>
+  </div>
+</div>
+
+<div class="card" data-cat="S3" data-title="presigned url download get object duration">
+  <div class="card-header"><div class="card-meta"><span class="cat-badge cat-S3">S3</span><span class="sdk-tag">S3Presigner</span></div><div class="card-title">Presigned URL</div></div>
+  <div class="code-split">
+    <div class="code-pane old"><div class="code-pane-label">✕ Old (Date-based expiry)</div><pre><span class="cl">Date</span> expiry <span class="kw">=</span> <span class="kw">new</span> <span class="cl">Date</span>(
+  <span class="cl">System</span>.<span class="fn">currentTimeMillis</span>()
+  + 3600_000L);
+
+<span class="cl">GeneratePresignedUrl</span>
+  <span class="cl">Request</span> r <span class="kw">=</span> <span class="kw">new</span>
+  <span class="cl">GeneratePresignedUrl</span>
+  <span class="cl">Request</span>(bucket, key)
+    .<span class="fn">withExpiration</span>(expiry);
+<span class="cl">URL</span> url <span class="kw">=</span>
+  s3.<span class="fn">generatePresignedUrl</span>(r);</pre></div>
+    <div class="code-pane new"><div class="code-pane-label">✓ Modern (Duration-based)</div><pre><span class="cl">URL</span> url <span class="kw">=</span>
+  <span class="cl">S3Presigner</span>.<span class="fn">create</span>()
+    .<span class="fn">presignGetObject</span>(r <span class="kw">-></span> r
+      .<span class="fn">signatureDuration</span>(
+        <span class="cl">Duration</span>.<span class="fn">ofHours</span>(1))
+      .<span class="fn">getObjectRequest</span>(
+        g <span class="kw">-></span> g
+          .<span class="fn">bucket</span>(bucket)
+          .<span class="fn">key</span>(key)))
+    .<span class="fn">url</span>();</pre></div>
+  </div>
+</div>
+
+<div class="card" data-cat="S3" data-title="multipart upload transfer manager large file try with resources">
+  <div class="card-header"><div class="card-meta"><span class="cat-badge cat-S3">S3</span><span class="sdk-tag">Transfer Manager v2</span></div><div class="card-title">Large File Upload</div></div>
+  <div class="code-split">
+    <div class="code-pane old"><div class="code-pane-label">✕ Old (manual shutdown)</div><pre><span class="cl">TransferManager</span> tm <span class="kw">=</span>
+  <span class="cl">TransferManagerBuilder</span>
+    .<span class="fn">standard</span>()
+    .<span class="fn">withS3Client</span>(s3)
+    .<span class="fn">build</span>();
+<span class="cl">Upload</span> up <span class="kw">=</span>
+  tm.<span class="fn">upload</span>(bucket, key, f);
+up.<span class="fn">waitForCompletion</span>();
+<span class="cm">// Must call shutdownNow()!</span></pre></div>
+    <div class="code-pane new"><div class="code-pane-label">✓ Modern (try-with-resources)</div><pre><span class="kw">try</span> (<span class="cl">S3TransferManager</span> tm <span class="kw">=</span>
+    <span class="cl">S3TransferManager</span>.<span class="fn">create</span>()){
+
+  tm.<span class="fn">uploadFile</span>(r <span class="kw">-></span> r
+      .<span class="fn">putObjectRequest</span>(
+        p <span class="kw">-></span> p
+          .<span class="fn">bucket</span>(bucket)
+          .<span class="fn">key</span>(key))
+      .<span class="fn">source</span>(file))
+    .<span class="fn">completionFuture</span>()
+    .<span class="fn">join</span>();
+} <span class="cm">// auto-closes ✓</span></pre></div>
+  </div>
+</div>
+
+<!-- DynamoDB -->
+<div class="section-label" data-cat="DynamoDB"><span class="section-label-text">DynamoDB</span><div class="section-label-line"></div></div>
+
+<div class="card" data-cat="DynamoDB" data-title="save put item dynamodb mapper enhanced bean annotation">
+  <div class="card-header"><div class="card-meta"><span class="cat-badge cat-DynamoDB">DynamoDB</span><span class="sdk-tag">Enhanced Client</span></div><div class="card-title">Save Item</div></div>
+  <div class="code-split">
+    <div class="code-pane old"><div class="code-pane-label">✕ Old (DynamoDB Mapper)</div><pre><span class="kw">@DynamoDBTable</span>(
+  tableName<span class="kw">=</span><span class="st">"Orders"</span>)
+<span class="kw">public class</span> <span class="cl">Order</span> { ... }
+
+<span class="cl">DynamoDBMapper</span> mapper <span class="kw">=</span>
+  <span class="kw">new</span> <span class="cl">DynamoDBMapper</span>(client);
+mapper.<span class="fn">save</span>(order);
+<span class="cm">// @DynamoDBHashKey etc.</span></pre></div>
+    <div class="code-pane new"><div class="code-pane-label">✓ Modern (Enhanced Client)</div><pre><span class="kw">@DynamoDbBean</span>
+<span class="kw">public class</span> <span class="cl">Order</span> { ... }
+
+<span class="cl">DynamoDbTable</span>&lt;<span class="cl">Order</span>&gt; tbl <span class="kw">=</span>
+  db.<span class="fn">table</span>(<span class="st">"Orders"</span>,
+    <span class="cl">TableSchema</span>.<span class="fn">fromBean</span>(
+      <span class="cl">Order</span>.<span class="kw">class</span>));
+tbl.<span class="fn">putItem</span>(order);
+<span class="cm">// @DynamoDbPartitionKey ✓</span></pre></div>
+  </div>
+</div>
+
+<div class="card" data-cat="DynamoDB" data-title="query filter expression enhanced request type safe">
+  <div class="card-header"><div class="card-meta"><span class="cat-badge cat-DynamoDB">DynamoDB</span><span class="sdk-tag">Enhanced Client</span></div><div class="card-title">Query with Filter</div></div>
+  <div class="code-split">
+    <div class="code-pane old"><div class="code-pane-label">✕ Old (verbose Condition map)</div><pre><span class="cl">Map</span>&lt;<span class="cl">String</span>, <span class="cl">Condition</span>&gt; cond <span class="kw">=</span>
+  <span class="kw">new</span> <span class="cl">HashMap</span>&lt;&gt;();
+cond.<span class="fn">put</span>(<span class="st">"status"</span>, <span class="kw">new</span>
+  <span class="cl">Condition</span>()
+  .<span class="fn">withComparisonOperator</span>(
+    <span class="cl">ComparisonOperator</span>.EQ)
+  .<span class="fn">withAttributeValueList</span>(
+    <span class="kw">new</span> <span class="cl">AttributeValue</span>()
+      .<span class="fn">withS</span>(<span class="st">"ACTIVE"</span>)));
+<span class="cm">// verbose and fragile</span></pre></div>
+    <div class="code-pane new"><div class="code-pane-label">✓ Modern (type-safe builder)</div><pre><span class="cl">QueryEnhancedRequest</span> req <span class="kw">=</span>
+  <span class="cl">QueryEnhancedRequest</span>.<span class="fn">builder</span>()
+    .<span class="fn">queryConditional</span>(
+      <span class="cl">QueryConditional</span>
+        .<span class="fn">keyEqualTo</span>(k <span class="kw">-></span> k
+          .<span class="fn">partitionValue</span>(
+            customerId)))
+    .<span class="fn">filterExpression</span>(
+      <span class="cl">Expression</span>.<span class="fn">builder</span>()
+        .<span class="fn">expression</span>(
+          <span class="st">"#s = :active"</span>)
+        .<span class="fn">build</span>())
+    .<span class="fn">build</span>();</pre></div>
+  </div>
+</div>
+
+<div class="card" data-cat="DynamoDB" data-title="transactions write transact items atomicity type safe">
+  <div class="card-header"><div class="card-meta"><span class="cat-badge cat-DynamoDB">DynamoDB</span><span class="sdk-tag">Transactions</span></div><div class="card-title">Transactional Write</div></div>
+  <div class="code-split">
+    <div class="code-pane old"><div class="code-pane-label">✕ Old (raw TransactItems)</div><pre><span class="cl">TransactWriteItem</span> put <span class="kw">=</span>
+  <span class="kw">new</span> <span class="cl">TransactWriteItem</span>()
+    .<span class="fn">withPut</span>(<span class="kw">new</span> <span class="cl">Put</span>()
+      .<span class="fn">withTableName</span>(<span class="st">"Orders"</span>)
+      .<span class="fn">withItem</span>(avMap));
+<span class="cl">TransactWriteItem</span> upd <span class="kw">=</span>
+  <span class="kw">new</span> <span class="cl">TransactWriteItem</span>()
+    .<span class="fn">withUpdate</span>(<span class="kw">new</span> <span class="cl">Update</span>()
+      .<span class="fn">withTableName</span>(
+        <span class="st">"Inventory"</span>)
+      .<span class="fn">withUpdateExpression</span>(
+        <span class="st">"SET qty=qty-:n"</span>));
+<span class="cm">// Raw AttributeValue maps</span></pre></div>
+    <div class="code-pane new"><div class="code-pane-label">✓ Modern (type-safe, object-level)</div><pre><span class="cl">TransactWriteItemsEnhanced</span>
+  <span class="cl">Request</span> txn <span class="kw">=</span>
+  <span class="cl">TransactWriteItemsEnhanced</span>
+  <span class="cl">Request</span>.<span class="fn">builder</span>()
+    .<span class="fn">addPutItem</span>(
+      ordersTable, order)
+    .<span class="fn">addUpdateItem</span>(
+      inventoryTable,
+      inventoryUpdate)
+    .<span class="fn">build</span>();
+
+db.<span class="fn">transactWriteItems</span>(txn);</pre></div>
+  </div>
+</div>
+
+<div class="card" data-cat="DynamoDB" data-title="batch write put items bulk auto chunking retry">
+  <div class="card-header"><div class="card-meta"><span class="cat-badge cat-DynamoDB">DynamoDB</span><span class="sdk-tag">Batch Operations</span></div><div class="card-title">Batch Write Items</div></div>
+  <div class="code-split">
+    <div class="code-pane old"><div class="code-pane-label">✕ Old (manual 25-item chunks)</div><pre><span class="cm">// DynamoDB limit: 25/request</span>
+<span class="cm">// Must chunk + retry manually</span>
+<span class="cl">List</span>&lt;<span class="cl">WriteRequest</span>&gt; chunk <span class="kw">=</span>
+  items.<span class="fn">subList</span>(0, 25);
+<span class="cl">Map</span>&lt;<span class="cl">String</span>, <span class="cl">List</span>&lt;...&gt;&gt; r <span class="kw">=</span>
+  <span class="cl">Map</span>.<span class="fn">of</span>(<span class="st">"Orders"</span>, chunk);
+<span class="kw">new</span> <span class="cl">BatchWriteItemRequest</span>()
+  .<span class="fn">withRequestItems</span>(r);
+<span class="cm">// Retry unprocessed yourself!</span></pre></div>
+    <div class="code-pane new"><div class="code-pane-label">✓ Modern (auto-batch + retry)</div><pre><span class="cl">WriteBatch</span> batch <span class="kw">=</span>
+  <span class="cl">WriteBatch</span>.<span class="fn">builder</span>(
+    <span class="cl">Order</span>.<span class="kw">class</span>)
+    .<span class="fn">mappedTableResource</span>(
+      ordersTable)
+    .<span class="fn">addPutItem</span>(order1)
+    .<span class="fn">addPutItem</span>(order2)
+    .<span class="fn">build</span>();
+
+db.<span class="fn">batchWriteItem</span>(r <span class="kw">-></span> r
+  .<span class="fn">addWriteBatch</span>(batch));
+<span class="cm">// SDK chunks + retries ✓</span></pre></div>
+  </div>
+</div>
+
+<!-- SQS -->
+<div class="section-label" data-cat="SQS"><span class="section-label-text">SQS</span><div class="section-label-line"></div></div>
+
+<div class="card" data-cat="SQS" data-title="send message sqs builder immutable">
+  <div class="card-header"><div class="card-meta"><span class="cat-badge cat-SQS">SQS</span><span class="sdk-tag">v1 → v2</span></div><div class="card-title">Send Message</div></div>
+  <div class="code-split">
+    <div class="code-pane old"><div class="code-pane-label">✕ Old (mutable setters)</div><pre><span class="cl">SendMessageRequest</span> req <span class="kw">=</span>
+  <span class="kw">new</span> <span class="cl">SendMessageRequest</span>()
+    .<span class="fn">withQueueUrl</span>(queueUrl)
+    .<span class="fn">withMessageBody</span>(body)
+    .<span class="fn">withDelaySeconds</span>(0);
+sqs.<span class="fn">sendMessage</span>(req);</pre></div>
+    <div class="code-pane new"><div class="code-pane-label">✓ Modern (immutable builder)</div><pre><span class="cl">SendMessageRequest</span> req <span class="kw">=</span>
+  <span class="cl">SendMessageRequest</span>.<span class="fn">builder</span>()
+    .<span class="fn">queueUrl</span>(queueUrl)
+    .<span class="fn">messageBody</span>(body)
+    .<span class="fn">delaySeconds</span>(0)
+    .<span class="fn">build</span>();
+
+sqs.<span class="fn">sendMessage</span>(req);</pre></div>
+  </div>
+</div>
+
+<div class="card" data-cat="SQS" data-title="batch delete receive messages after processing one api call">
+  <div class="card-header"><div class="card-meta"><span class="cat-badge cat-SQS">SQS</span><span class="sdk-tag">Batch Delete</span></div><div class="card-title">Batch Delete After Processing</div></div>
+  <div class="code-split">
+    <div class="code-pane old"><div class="code-pane-label">✕ Old (N separate API calls)</div><pre><span class="cl">List</span>&lt;<span class="cl">Message</span>&gt; msgs <span class="kw">=</span>
+  sqs.<span class="fn">receiveMessage</span>(url)
+     .<span class="fn">getMessages</span>();
+<span class="kw">for</span> (<span class="cl">Message</span> m : msgs) {
+  process(m);
+  <span class="cm">// 1 extra API call each!</span>
+  sqs.<span class="fn">deleteMessage</span>(
+    url,
+    m.<span class="fn">getReceiptHandle</span>());
+}</pre></div>
+    <div class="code-pane new"><div class="code-pane-label">✓ Modern (1 batch API call)</div><pre><span class="kw">var</span> msgs <span class="kw">=</span> sqs.<span class="fn">receiveMessage</span>(
+  r <span class="kw">-></span> r.<span class="fn">queueUrl</span>(url))
+  .<span class="fn">messages</span>();
+msgs.<span class="fn">forEach</span>(<span class="kw">this</span>::process);
+
+sqs.<span class="fn">deleteMessageBatch</span>(r <span class="kw">-></span>r
+  .<span class="fn">queueUrl</span>(url)
+  .<span class="fn">entries</span>(msgs.<span class="fn">stream</span>()
+    .<span class="fn">map</span>(m <span class="kw">-></span>
+      <span class="cl">DeleteMessageBatch</span>
+      <span class="cl">RequestEntry</span>.<span class="fn">builder</span>()
+        .<span class="fn">id</span>(m.<span class="fn">messageId</span>())
+        .<span class="fn">receiptHandle</span>(
+          m.<span class="fn">receiptHandle</span>())
+        .<span class="fn">build</span>()).<span class="fn">toList</span>()));</pre></div>
+  </div>
+</div>
+
+<div class="card" data-cat="SQS" data-title="trace context propagation otel adot auto inject">
+  <div class="card-header"><div class="card-meta"><span class="cat-badge cat-SQS">SQS</span><span class="sdk-tag">OpenTelemetry</span></div><div class="card-title">Trace Context Propagation</div></div>
+  <div class="code-split">
+    <div class="code-pane old"><div class="code-pane-label">✕ Old (manual X-Ray header)</div><pre><span class="cl">MessageAttributeValue</span> t <span class="kw">=</span>
+  <span class="kw">new</span> <span class="cl">MessageAttributeValue</span>()
+    .<span class="fn">withDataType</span>(<span class="st">"String"</span>)
+    .<span class="fn">withStringValue</span>(
+      <span class="cl">AWSXRay</span>
+        .<span class="fn">getCurrentSegment</span>()
+        .<span class="fn">getTraceId</span>());
+req.<span class="fn">addMessageAttribute</span>(
+  <span class="st">"X-Amzn-Trace-Id"</span>, t);</pre></div>
+    <div class="code-pane new"><div class="code-pane-label">✓ Modern (ADOT auto-injects)</div><pre><span class="cm">// ADOT agent injects</span>
+<span class="cm">// traceparent header into</span>
+<span class="cm">// MessageSystemAttributes</span>
+<span class="cm">// automatically on send.</span>
+
+<span class="cm">// Just annotate your span:</span>
+<span class="cl">Span</span>.<span class="fn">current</span>()
+  .<span class="fn">setAttribute</span>(
+    <span class="st">"order.id"</span>, orderId);
+<span class="cm">// Consumer restores context</span>
+<span class="cm">// with zero extra code ✓</span></pre></div>
+  </div>
+</div>
+
+<!-- SNS -->
+<div class="section-label" data-cat="SNS"><span class="section-label-text">SNS</span><div class="section-label-line"></div></div>
+
+<div class="card" data-cat="SNS" data-title="publish message topic arn sns sdk v2">
+  <div class="card-header"><div class="card-meta"><span class="cat-badge cat-SNS">SNS</span><span class="sdk-tag">v1 → v2</span></div><div class="card-title">Publish to Topic</div></div>
+  <div class="code-split">
+    <div class="code-pane old"><div class="code-pane-label">✕ Old</div><pre><span class="cl">PublishRequest</span> req <span class="kw">=</span>
+  <span class="kw">new</span> <span class="cl">PublishRequest</span>()
+    .<span class="fn">withTopicArn</span>(topicArn)
+    .<span class="fn">withMessage</span>(message)
+    .<span class="fn">withSubject</span>(
+      <span class="st">"Order Created"</span>);
+<span class="kw">String</span> msgId <span class="kw">=</span> sns
+  .<span class="fn">publish</span>(req)
+  .<span class="fn">getMessageId</span>();</pre></div>
+    <div class="code-pane new"><div class="code-pane-label">✓ Modern</div><pre><span class="kw">String</span> msgId <span class="kw">=</span>
+  sns.<span class="fn">publish</span>(r <span class="kw">-></span> r
+    .<span class="fn">topicArn</span>(topicArn)
+    .<span class="fn">message</span>(message)
+    .<span class="fn">subject</span>(
+      <span class="st">"Order Created"</span>))
+  .<span class="fn">messageId</span>();</pre></div>
+  </div>
+</div>
+
+<div class="card" data-cat="SNS" data-title="message attributes filter policy event type metadata">
+  <div class="card-header"><div class="card-meta"><span class="cat-badge cat-SNS">SNS</span><span class="sdk-tag">Filter Policy</span></div><div class="card-title">Publish with Attributes</div></div>
+  <div class="code-split">
+    <div class="code-pane old"><div class="code-pane-label">✕ Old (verbose map)</div><pre><span class="cl">Map</span>&lt;<span class="cl">String</span>,
+  <span class="cl">MessageAttributeValue</span>&gt;
+  attrs <span class="kw">=</span> <span class="kw">new</span> <span class="cl">HashMap</span>&lt;&gt;();
+attrs.<span class="fn">put</span>(<span class="st">"eventType"</span>,
+  <span class="kw">new</span> <span class="cl">MessageAttributeValue</span>()
+    .<span class="fn">withDataType</span>(<span class="st">"String"</span>)
+    .<span class="fn">withStringValue</span>(
+      <span class="st">"ORDER_CREATED"</span>));
+<span class="cm">// Enables filter policy so</span>
+<span class="cm">// SQS gets only matching msgs</span></pre></div>
+    <div class="code-pane new"><div class="code-pane-label">✓ Modern</div><pre><span class="kw">var</span> attr <span class="kw">=</span>
+  software.amazon.awssdk
+  .services.sns.model
+  .<span class="cl">MessageAttributeValue</span>
+  .<span class="fn">builder</span>()
+  .<span class="fn">dataType</span>(<span class="st">"String"</span>)
+  .<span class="fn">stringValue</span>(
+    <span class="st">"ORDER_CREATED"</span>)
+  .<span class="fn">build</span>();
+
+sns.<span class="fn">publish</span>(r <span class="kw">-></span> r
+  .<span class="fn">topicArn</span>(topicArn)
+  .<span class="fn">message</span>(payload)
+  .<span class="fn">messageAttributes</span>(
+    <span class="cl">Map</span>.<span class="fn">of</span>(<span class="st">"eventType"</span>,attr)));</pre></div>
+  </div>
+</div>
+
+<div class="card" data-cat="SNS" data-title="fifo topic message group deduplication ordering">
+  <div class="card-header"><div class="card-meta"><span class="cat-badge cat-SNS">SNS</span><span class="sdk-tag">FIFO</span></div><div class="card-title">FIFO Topic Publish</div></div>
+  <div class="code-split">
+    <div class="code-pane old"><div class="code-pane-label">✕ Old (Standard — no ordering)</div><pre><span class="cm">// Standard SNS = no ordering</span>
+<span class="cm">// No deduplication guarantee</span>
+<span class="cm">// Consumers handle duplicates</span>
+sns.<span class="fn">publish</span>(<span class="kw">new</span>
+  <span class="cl">PublishRequest</span>()
+  .<span class="fn">withTopicArn</span>(topicArn)
+  .<span class="fn">withMessage</span>(payload));
+<span class="cm">// May arrive out of order ⚠️</span></pre></div>
+    <div class="code-pane new"><div class="code-pane-label">✓ Modern (FIFO, deduped)</div><pre><span class="cm">// Topic ARN ends in .fifo</span>
+sns.<span class="fn">publish</span>(r <span class="kw">-></span> r
+  .<span class="fn">topicArn</span>(fifoTopicArn)
+  .<span class="fn">message</span>(payload)
+  .<span class="cm">// Orders msgs within group</span>
+  .<span class="fn">messageGroupId</span>(
+    <span class="st">"orders"</span>)
+  .<span class="cm">// Idempotency key</span>
+  .<span class="fn">messageDeduplicationId</span>(
+    orderId));
+<span class="cm">// Ordered + exactly-once ✓</span></pre></div>
+  </div>
+</div>
+
+<!-- EventBridge -->
+<div class="section-label" data-cat="EventBridge"><span class="section-label-text">EventBridge</span><div class="section-label-line"></div></div>
+
+<div class="card" data-cat="EventBridge" data-title="put events sdk v2 custom bus failed entry count">
+  <div class="card-header"><div class="card-meta"><span class="cat-badge cat-EventBridge">EventBridge</span><span class="sdk-tag">v1 → v2</span></div><div class="card-title">Put Events</div></div>
+  <div class="code-split">
+    <div class="code-pane old"><div class="code-pane-label">✕ Old</div><pre><span class="cl">PutEventsRequest</span> req <span class="kw">=</span>
+  <span class="kw">new</span> <span class="cl">PutEventsRequest</span>()
+    .<span class="fn">withEntries</span>(<span class="kw">new</span>
+      <span class="cl">PutEventsRequestEntry</span>()
+        .<span class="fn">withSource</span>(
+          <span class="st">"myapp.orders"</span>)
+        .<span class="fn">withDetailType</span>(
+          <span class="st">"OrderCreated"</span>)
+        .<span class="fn">withDetail</span>(json)
+        .<span class="fn">withEventBusName</span>(
+          <span class="st">"orders-bus"</span>));
+eb.<span class="fn">putEvents</span>(req);</pre></div>
+    <div class="code-pane new"><div class="code-pane-label">✓ Modern</div><pre><span class="cl">PutEventsResponse</span> resp <span class="kw">=</span>
+  eb.<span class="fn">putEvents</span>(r <span class="kw">-></span> r
+    .<span class="fn">entries</span>(
+      <span class="cl">PutEventsRequestEntry</span>
+        .<span class="fn">builder</span>()
+        .<span class="fn">source</span>(
+          <span class="st">"myapp.orders"</span>)
+        .<span class="fn">detailType</span>(
+          <span class="st">"OrderCreated"</span>)
+        .<span class="fn">detail</span>(json)
+        .<span class="fn">eventBusName</span>(
+          <span class="st">"orders-bus"</span>)
+        .<span class="fn">build</span>()));
+<span class="cm">// Check failures:</span>
+resp.<span class="fn">failedEntryCount</span>();</pre></div>
+  </div>
+</div>
+
+<div class="card" data-cat="EventBridge" data-title="schema registry typed event pojo code bindings">
+  <div class="card-header"><div class="card-meta"><span class="cat-badge cat-EventBridge">EventBridge</span><span class="sdk-tag">Schema Registry</span></div><div class="card-title">Typed Event Envelope</div></div>
+  <div class="code-split">
+    <div class="code-pane old"><div class="code-pane-label">✕ Old (raw JSON string)</div><pre><span class="cm">// Manual JSON, no type safety</span>
+<span class="kw">String</span> detail <span class="kw">=</span>
+  <span class="st">"""
+  {
+    "orderId": "</span><span class="kw">+</span> id <span class="kw">+</span><span class="st">"""",
+    "status": "CREATED"
+  }"""</span>;
+<span class="cm">// Typos caught at runtime!</span></pre></div>
+    <div class="code-pane new"><div class="code-pane-label">✓ Modern (generated POJO)</div><pre><span class="cm">// EventBridge Schema Registry</span>
+<span class="cm">// → Download code bindings</span>
+<span class="cm">// → Generated POJO:</span>
+<span class="cl">OrderCreated</span> event <span class="kw">=</span>
+  <span class="kw">new</span> <span class="cl">OrderCreated</span>();
+event.<span class="fn">setOrderId</span>(id);
+event.<span class="fn">setStatus</span>(<span class="st">"CREATED"</span>);
+
+<span class="kw">String</span> json <span class="kw">=</span> mapper
+  .<span class="fn">writeValueAsString</span>(event);
+<span class="cm">// Schema-backed, type-safe ✓</span></pre></div>
+  </div>
+</div>
+
+<div class="card" data-cat="EventBridge" data-title="lambda consumer target deserialize event typed aws events">
+  <div class="card-header"><div class="card-meta"><span class="cat-badge cat-EventBridge">EventBridge</span><span class="sdk-tag">Lambda Target</span></div><div class="card-title">Lambda Consumer</div></div>
+  <div class="code-split">
+    <div class="code-pane old"><div class="code-pane-label">✕ Old (raw Map casting)</div><pre><span class="kw">public void</span> <span class="fn">handleRequest</span>(
+  <span class="cl">Map</span>&lt;<span class="cl">String</span>, <span class="cl">Object</span>&gt; event,
+  <span class="cl">Context</span> ctx) {
+  <span class="kw">String</span> type <span class="kw">=</span>
+    (<span class="cl">String</span>) event
+      .<span class="fn">get</span>(<span class="st">"detail-type"</span>);
+  <span class="cl">Map</span>&lt;?,?&gt; detail <span class="kw">=</span>
+    (<span class="cl">Map</span>&lt;?,?&gt;) event
+      .<span class="fn">get</span>(<span class="st">"detail"</span>);
+  <span class="cm">// Fragile string casting</span>
+}</pre></div>
+    <div class="code-pane new"><div class="code-pane-label">✓ Modern (aws-lambda-java-events)</div><pre><span class="kw">public void</span> <span class="fn">handleRequest</span>(
+  <span class="cl">ScheduledEvent</span> event,
+  <span class="cl">Context</span> ctx) {
+
+  <span class="kw">String</span> source <span class="kw">=</span>
+    event.<span class="fn">getSource</span>();
+  <span class="kw">String</span> type <span class="kw">=</span>
+    event.<span class="fn">getDetailType</span>();
+
+  <span class="cl">OrderCreated</span> detail <span class="kw">=</span>
+    mapper.<span class="fn">convertValue</span>(
+      event.<span class="fn">getDetail</span>(),
+      <span class="cl">OrderCreated</span>.<span class="kw">class</span>);
+  <span class="cm">// Fully typed ✓</span>
+}</pre></div>
+  </div>
+</div>
+
+<!-- Lambda -->
+<div class="section-label" data-cat="Lambda"><span class="section-label-text">Lambda</span><div class="section-label-line"></div></div>
+
+<div class="card" data-cat="Lambda" data-title="cold start snapstart crac 200ms provisioned concurrency">
+  <div class="card-header"><div class="card-meta"><span class="cat-badge cat-Lambda">Lambda</span><span class="sdk-tag">SnapStart</span></div><div class="card-title">Eliminating Cold Starts</div></div>
+  <div class="code-split">
+    <div class="code-pane old"><div class="code-pane-label">✕ Old (JVM 5–15s cold start)</div><pre><span class="cm">// Spring Boot JVM Lambda:</span>
+<span class="cm">// Cold start: 10–15 seconds</span>
+<span class="cm">// Memory: 2048 MB required</span>
+<span class="cm">// Workaround: Provisioned</span>
+<span class="cm">// Concurrency = $$$</span>
+
+<span class="kw">public class</span> <span class="cl">Handler</span>
+  <span class="kw">implements</span>
+  <span class="cl">RequestHandler</span>&lt;...&gt; {
+  <span class="cm">// Spring context boots on</span>
+  <span class="cm">// every cold start ⚠️</span>
+}</pre></div>
+    <div class="code-pane new"><div class="code-pane-label">✓ Modern (SnapStart ~200ms)</div><pre><span class="cm">// SAM: SnapStart: Published</span>
+<span class="cm">// Versions</span>
+
+<span class="kw">@SpringBootApplication</span>
+<span class="kw">public class</span> <span class="cl">Handler</span>
+  <span class="kw">implements</span>
+  <span class="cl">SpringBootRequestHandler</span>
+  <span class="cl">&lt;Order, Response&gt;</span>,
+  <span class="cl">CRaC.Resource</span> {
+
+  <span class="kw">@Override</span>
+  <span class="kw">public void</span>
+    <span class="fn">beforeCheckpoint</span>(
+      <span class="cl">Context</span> ctx) {
+    <span class="cm">// pre-warm connections</span>
+  }
+} <span class="cm">// ~200ms cold start ✓</span></pre></div>
+  </div>
+</div>
+
+<div class="card" data-cat="Lambda" data-title="tracing x-ray sdk deprecated adot otel layer env var">
+  <div class="card-header"><div class="card-meta"><span class="cat-badge cat-Lambda">Lambda</span><span class="sdk-tag">ADOT Layer</span></div><div class="card-title">Lambda Tracing</div></div>
+  <div class="code-split">
+    <div class="code-pane old"><div class="code-pane-label">✕ Old (X-Ray SDK — deprecated ⚠️)</div><pre><span class="cm">// Maintenance mode Feb 2026</span>
+<span class="kw">import</span> com.amazonaws.xray
+  .AWSXRay;
+
+<span class="cl">Subsegment</span> seg <span class="kw">=</span>
+  <span class="cl">AWSXRay</span>.<span class="fn">beginSubsegment</span>(
+    <span class="st">"processOrder"</span>);
+<span class="kw">try</span> {
+  process(event);
+} <span class="kw">finally</span> {
+  <span class="cl">AWSXRay</span>.<span class="fn">endSubsegment</span>();
+}</pre></div>
+    <div class="code-pane new"><div class="code-pane-label">✓ Modern (ADOT + OTel)</div><pre><span class="cm">// Layer: AWSOpenTelemetry</span>
+<span class="cm">// DistroJava (region ARN)</span>
+<span class="cm">// Env: AWS_LAMBDA_EXEC_WRAPPER</span>
+<span class="cm">//   = /opt/otel-instrument</span>
+
+<span class="cm">// Zero code changes needed.</span>
+<span class="cm">// Add custom attributes:</span>
+<span class="cl">Span</span>.<span class="fn">current</span>()
+  .<span class="fn">setAttribute</span>(
+    <span class="st">"order.id"</span>, orderId);
+<span class="cm">// Visible in App Signals ✓</span></pre></div>
+  </div>
+</div>
+
+<div class="card" data-cat="Lambda" data-title="response streaming large payload 20mb request stream handler">
+  <div class="card-header"><div class="card-meta"><span class="cat-badge cat-Lambda">Lambda</span><span class="sdk-tag">Response Streaming</span></div><div class="card-title">Response Streaming</div></div>
+  <div class="code-split">
+    <div class="code-pane old"><div class="code-pane-label">✕ Old (6MB limit workaround)</div><pre><span class="cm">// Lambda response limit: 6MB</span>
+<span class="cm">// Workaround: write to S3,</span>
+<span class="cm">// return presigned URL</span>
+<span class="kw">String</span> key <span class="kw">=</span>
+  <span class="st">"results/"</span> + requestId;
+s3.<span class="fn">putObject</span>(
+  bucket, key, largePayload);
+<span class="kw">return</span> presigner
+  .<span class="fn">presignGetObject</span>(...);
+<span class="cm">// Client needs extra GET ⚠️</span></pre></div>
+    <div class="code-pane new"><div class="code-pane-label">✓ Modern (stream up to 20MB)</div><pre><span class="kw">public class</span> <span class="cl">Handler</span>
+  <span class="kw">implements</span>
+  <span class="cl">RequestStreamHandler</span> {
+
+  <span class="kw">@Override</span>
+  <span class="kw">public void</span> <span class="fn">handleRequest</span>(
+    <span class="cl">InputStream</span> in,
+    <span class="cl">OutputStream</span> out,
+    <span class="cl">Context</span> ctx) {
+    <span class="cm">// Stream response directly</span>
+    <span class="cm">// to caller as it arrives.</span>
+    <span class="cm">// Zero S3 round-trip ✓</span>
+  }
+}</pre></div>
+  </div>
+</div>
+
+<div class="card" data-cat="Lambda" data-title="powertools structured logging cold start correlation id">
+  <div class="card-header"><div class="card-meta"><span class="cat-badge cat-Lambda">Lambda</span><span class="sdk-tag">Powertools</span></div><div class="card-title">Structured Logging</div></div>
+  <div class="code-split">
+    <div class="code-pane old"><div class="code-pane-label">✕ Old (unstructured text)</div><pre><span class="cl">Logger</span> log <span class="kw">=</span>
+  <span class="cl">LogManager</span>.<span class="fn">getLogger</span>();
+
+<span class="cm">// No correlation ID,</span>
+<span class="cm">// no cold start flag,</span>
+<span class="cm">// hard to query in Insights</span>
+log.<span class="fn">info</span>(<span class="st">"Processing order "</span>
+  + orderId + <span class="st">" for "</span>
+  + customerId);</pre></div>
+    <div class="code-pane new"><div class="code-pane-label">✓ Modern (JSON via Powertools)</div><pre><span class="kw">@Logging</span>(logEvent<span class="kw">=</span><span class="kw">true</span>)
+<span class="kw">public class</span> <span class="cl">Handler</span> {
+
+  <span class="cl">Logger</span> log <span class="kw">=</span>
+    <span class="cl">LoggingUtils</span>.<span class="fn">getLogger</span>();
+
+  <span class="cl">LoggingUtils</span>.<span class="fn">appendKey</span>(
+    <span class="st">"orderId"</span>, orderId);
+  log.<span class="fn">info</span>(<span class="st">"Processing"</span>);
+  <span class="cm">// {"message":"Processing",</span>
+  <span class="cm">// "orderId":"123",</span>
+  <span class="cm">// "coldStart":false} ✓</span>
+}</pre></div>
+  </div>
+</div>
+
+<!-- Secrets -->
+<div class="section-label" data-cat="Secrets"><span class="section-label-text">Secrets Manager</span><div class="section-label-line"></div></div>
+
+<div class="card" data-cat="Secrets" data-title="get secret value retrieve database password rotation no redeploy">
+  <div class="card-header"><div class="card-meta"><span class="cat-badge cat-Secrets">Secrets</span><span class="sdk-tag">v1 → v2</span></div><div class="card-title">Retrieve Secret</div></div>
+  <div class="code-split">
+    <div class="code-pane old"><div class="code-pane-label">✕ Old (hardcoded env var)</div><pre><span class="cm">// .env or env variable:</span>
+<span class="cm">// DB_PASSWORD=supersecret</span>
+<span class="kw">String</span> pwd <span class="kw">=</span>
+  <span class="cl">System</span>.<span class="fn">getenv</span>(
+    <span class="st">"DB_PASSWORD"</span>);
+<span class="cm">// Visible in task def</span>
+<span class="cm">// Visible in CloudTrail</span>
+<span class="cm">// Rotation = redeploy ⚠️</span></pre></div>
+    <div class="code-pane new"><div class="code-pane-label">✓ Modern (Secrets Manager)</div><pre><span class="cl">SecretsManagerClient</span> sm <span class="kw">=</span>
+  <span class="cl">SecretsManagerClient</span>
+    .<span class="fn">create</span>();
+
+<span class="kw">String</span> secret <span class="kw">=</span>
+  sm.<span class="fn">getSecretValue</span>(r <span class="kw">-></span> r
+    .<span class="fn">secretId</span>(
+      <span class="st">"prod/myapp/db"</span>))
+  .<span class="fn">secretString</span>();
+
+<span class="cl">DbCreds</span> creds <span class="kw">=</span>
+  mapper.<span class="fn">readValue</span>(
+    secret, <span class="cl">DbCreds</span>.<span class="kw">class</span>);
+<span class="cm">// Rotation = no redeploy ✓</span></pre></div>
+  </div>
+</div>
+
+<div class="card" data-cat="Secrets" data-title="secret caching client ttl lambda throttling invocation">
+  <div class="card-header"><div class="card-meta"><span class="cat-badge cat-Secrets">Secrets</span><span class="sdk-tag">Caching Client</span></div><div class="card-title">Secret Caching</div></div>
+  <div class="code-split">
+    <div class="code-pane old"><div class="code-pane-label">✕ Old (fetches every invocation)</div><pre><span class="kw">public void</span> <span class="fn">handleRequest</span>(...) {
+  <span class="cm">// New API call on EVERY</span>
+  <span class="cm">// Lambda invocation!</span>
+  <span class="kw">String</span> secret <span class="kw">=</span>
+    sm.<span class="fn">getSecretValue</span>(r <span class="kw">-></span> r
+      .<span class="fn">secretId</span>(secretId))
+    .<span class="fn">secretString</span>();
+  <span class="cm">// Throttled at high</span>
+  <span class="cm">// concurrency ⚠️</span>
+}</pre></div>
+    <div class="code-pane new"><div class="code-pane-label">✓ Modern (caching, TTL=1hr)</div><pre><span class="cm">// aws-secretsmanager-</span>
+<span class="cm">// caching-java</span>
+<span class="cl">SecretCache</span> cache <span class="kw">=</span>
+  <span class="kw">new</span> <span class="cl">SecretCache</span>();
+
+<span class="kw">public void</span> <span class="fn">handleRequest</span>(...) {
+  <span class="cm">// Cache hit after first call</span>
+  <span class="kw">String</span> secret <span class="kw">=</span>
+    cache.<span class="fn">getSecretString</span>(
+      secretId);
+  <span class="cm">// Zero API calls on warm</span>
+  <span class="cm">// Lambda invocations ✓</span>
+}</pre></div>
+  </div>
+</div>
+
+<div class="card" data-cat="Secrets" data-title="spring boot datasource auto inject secrets manager application yml">
+  <div class="card-header"><div class="card-meta"><span class="cat-badge cat-Secrets">Secrets</span><span class="sdk-tag">Spring Cloud AWS</span></div><div class="card-title">DataSource Auto-injection</div></div>
+  <div class="code-split">
+    <div class="code-pane old"><div class="code-pane-label">✕ Old (manual fetch in @Bean)</div><pre><span class="kw">@Bean</span>
+<span class="kw">public</span> <span class="cl">DataSource</span>
+  <span class="fn">dataSource</span>() {
+  <span class="kw">String</span> s <span class="kw">=</span>
+    sm.<span class="fn">getSecretValue</span>(r <span class="kw">-></span> r
+      .<span class="fn">secretId</span>(<span class="st">"prod/db"</span>))
+    .<span class="fn">secretString</span>();
+  <span class="cl">DbCreds</span> creds <span class="kw">=</span>
+    mapper.<span class="fn">readValue</span>(s,
+      <span class="cl">DbCreds</span>.<span class="kw">class</span>);
+  <span class="kw">return</span> <span class="cl">DataSourceBuilder</span>
+    .<span class="fn">create</span>()
+    .<span class="fn">password</span>(
+      creds.<span class="fn">getPassword</span>())
+    .<span class="fn">build</span>();
+}</pre></div>
+    <div class="code-pane new"><div class="code-pane-label">✓ Modern (application.yml)</div><pre><span class="cm"># application.yml:</span>
+<span class="cm"># spring.cloud.aws</span>
+<span class="cm">#   .secretsmanager</span>
+<span class="cm">#   .enabled: true</span>
+<span class="cm">#</span>
+<span class="cm"># spring.datasource.password:</span>
+<span class="cm">#  ${/secret/prod/db:password}</span>
+<span class="cm">#</span>
+<span class="cm"># Spring Cloud AWS fetches</span>
+<span class="cm"># and injects automatically.</span>
+<span class="cm"># Rotation = restart only ✓</span></pre></div>
+  </div>
+</div>
+
+<!-- Bedrock -->
+<div class="section-label" data-cat="Bedrock"><span class="section-label-text">Bedrock</span><div class="section-label-line"></div></div>
+
+<div class="card" data-cat="Bedrock" data-title="invoke model claude llm text generation converse api">
+  <div class="card-header"><div class="card-meta"><span class="cat-badge cat-Bedrock">Bedrock</span><span class="sdk-tag">Converse API</span></div><div class="card-title">Invoke Model (Claude)</div></div>
+  <div class="code-split">
+    <div class="code-pane old"><div class="code-pane-label">✕ Old (raw JSON bytes)</div><pre><span class="cm">// Manual JSON body, raw bytes</span>
+<span class="kw">String</span> body <span class="kw">=</span> <span class="st">"""
+  {"prompt":"...",
+   "max_tokens":1000}"""</span>;
+<span class="cl">InvokeModelRequest</span> req <span class="kw">=</span>
+  <span class="cl">InvokeModelRequest</span>.<span class="fn">builder</span>()
+    .<span class="fn">modelId</span>(<span class="st">"anthropic.claude"</span>
+      <span class="st">"-3-sonnet-..."</span>)
+    .<span class="fn">body</span>(<span class="cl">SdkBytes</span>
+      .<span class="fn">fromUtf8String</span>(body))
+    .<span class="fn">build</span>();
+<span class="cm">// Parse response JSON manually</span></pre></div>
+    <div class="code-pane new"><div class="code-pane-label">✓ Modern (Converse API)</div><pre><span class="cm">// Unified API — any model</span>
+<span class="cl">ConverseResponse</span> resp <span class="kw">=</span>
+  bedrock.<span class="fn">converse</span>(r <span class="kw">-></span> r
+    .<span class="fn">modelId</span>(
+      <span class="st">"anthropic.claude-3"</span>
+      <span class="st">"-sonnet-..."</span>)
+    .<span class="fn">messages</span>(
+      <span class="cl">Message</span>.<span class="fn">builder</span>()
+        .<span class="fn">role</span>(<span class="cl">ConversationRole</span>
+          .USER)
+        .<span class="fn">content</span>(
+          <span class="cl">ContentBlock</span>
+            .<span class="fn">fromText</span>(prompt))
+        .<span class="fn">build</span>()));
+<span class="kw">String</span> text <span class="kw">=</span>
+  resp.<span class="fn">output</span>().<span class="fn">message</span>()
+  .<span class="fn">content</span>().<span class="fn">get</span>(0).<span class="fn">text</span>();</pre></div>
+  </div>
+</div>
+
+<div class="card" data-cat="Bedrock" data-title="streaming response converse stream token real time async">
+  <div class="card-header"><div class="card-meta"><span class="cat-badge cat-Bedrock">Bedrock</span><span class="sdk-tag">ConverseStream</span></div><div class="card-title">Streaming Response</div></div>
+  <div class="code-split">
+    <div class="code-pane old"><div class="code-pane-label">✕ Old (waits for full response)</div><pre><span class="cm">// InvokeModel blocks until</span>
+<span class="cm">// entire response is ready.</span>
+<span class="cm">// For 1000 tokens: user</span>
+<span class="cm">// waits ~5s before seeing</span>
+<span class="cm">// anything at all ⚠️</span>
+<span class="cl">InvokeModelResponse</span> resp <span class="kw">=</span>
+  bedrock.<span class="fn">invokeModel</span>(req);
+<span class="cm">// Entire payload at once</span></pre></div>
+    <div class="code-pane new"><div class="code-pane-label">✓ Modern (token-by-token)</div><pre><span class="cl">BedrockRuntimeAsyncClient</span>
+  ba <span class="kw">=</span>
+  <span class="cl">BedrockRuntimeAsyncClient</span>
+    .<span class="fn">create</span>();
+
+ba.<span class="fn">converseStream</span>(req,
+  <span class="cl">ConverseStreamResponse</span>
+  <span class="cl">Handler</span>.<span class="fn">builder</span>()
+    .<span class="fn">onText</span>(e <span class="kw">-></span>
+      out.<span class="fn">write</span>(e.<span class="fn">text</span>()))
+    .<span class="fn">build</span>())
+  .<span class="fn">join</span>();
+<span class="cm">// Tokens stream in real-time ✓</span></pre></div>
+  </div>
+</div>
+
+<div class="card" data-cat="Bedrock" data-title="rag knowledge base retrieve generate managed vector search">
+  <div class="card-header"><div class="card-meta"><span class="cat-badge cat-Bedrock">Bedrock</span><span class="sdk-tag">Knowledge Bases</span></div><div class="card-title">RAG — Retrieve &amp; Generate</div></div>
+  <div class="code-split">
+    <div class="code-pane old"><div class="code-pane-label">✕ Old (DIY RAG pipeline)</div><pre><span class="cm">// ~200 lines of glue code:</span>
+<span class="cm">// 1. Generate embedding</span>
+<span class="cm">// 2. Query vector store</span>
+<span class="cm">// 3. Build context prompt</span>
+<span class="cm">// 4. Call LLM</span>
+<span class="cm">// 5. Parse response</span>
+<span class="cm">// + OpenSearch/Pinecone</span>
+<span class="cm">// + chunking strategy</span>
+<span class="cm">// + embedding model</span></pre></div>
+    <div class="code-pane new"><div class="code-pane-label">✓ Modern (managed RAG)</div><pre><span class="cl">RetrieveAndGenerate</span>
+  <span class="cl">Response</span> resp <span class="kw">=</span>
+  <span class="cl">BedrockAgentRuntimeClient</span>
+    .<span class="fn">create</span>()
+    .<span class="fn">retrieveAndGenerate</span>(
+      r <span class="kw">-></span> r
+      .<span class="fn">input</span>(i <span class="kw">-></span> i
+        .<span class="fn">text</span>(question))
+      .<span class="fn">retrieveAndGenerate</span>
+       <span class="fn">Configuration</span>(c <span class="kw">-></span> c
+        .<span class="fn">knowledgeBase</span>
+         <span class="fn">Configuration</span>(
+          kb <span class="kw">-></span> kb
+          .<span class="fn">knowledgeBaseId</span>(kbId)
+          .<span class="fn">modelArn</span>(modelArn))));
+<span class="cm">// answer + citations ✓</span></pre></div>
+  </div>
+</div>
+
+<div class="card" data-cat="Bedrock" data-title="embeddings titan vector generate semantic search">
+  <div class="card-header"><div class="card-meta"><span class="cat-badge cat-Bedrock">Bedrock</span><span class="sdk-tag">Embeddings</span></div><div class="card-title">Generate Embeddings</div></div>
+  <div class="code-split">
+    <div class="code-pane old"><div class="code-pane-label">✕ Old (manual JSON + parse)</div><pre><span class="cm">// Raw JSON body for Titan</span>
+<span class="kw">String</span> body <span class="kw">=</span>
+  <span class="st">"""{"inputText":"""</span>
+  <span class="kw">+</span><span class="st">"\""</span><span class="kw">+</span>text<span class="kw">+</span><span class="st">"\"}"""</span>;
+
+<span class="cm">// Parse float[] from response</span>
+<span class="cm">// JSON manually — fragile</span>
+<span class="kw">float</span>[] emb <span class="kw">=</span>
+  parseEmbedding(
+    resp.<span class="fn">body</span>()
+      .<span class="fn">asUtf8String</span>());</pre></div>
+    <div class="code-pane new"><div class="code-pane-label">✓ Modern (or use Knowledge Bases)</div><pre><span class="cm">// Titan Embeddings v2</span>
+<span class="cl">InvokeModelResponse</span> r <span class="kw">=</span>
+  bedrock.<span class="fn">invokeModel</span>(
+    req <span class="kw">-></span> req
+      .<span class="fn">modelId</span>(
+        <span class="st">"amazon.titan-embed"</span>
+        <span class="st">"-text-v2:0"</span>)
+      .<span class="fn">body</span>(<span class="cl">SdkBytes</span>
+        .<span class="fn">fromUtf8String</span>(
+          <span class="st">"""{"inputText":"""</span>
+          <span class="kw">+</span><span class="st">"\""</span><span class="kw">+</span>text<span class="kw">+</span><span class="st">"\"}"""</span>)));
+<span class="cm">// Or: Bedrock Knowledge</span>
+<span class="cm">// Bases handles embeddings</span>
+<span class="cm">// + storage for you ✓</span></pre></div>
+  </div>
+</div>
+
+<!-- Observability -->
+<div class="section-label" data-cat="Observability"><span class="section-label-text">Observability</span><div class="section-label-line"></div></div>
+
+<div class="card" data-cat="Observability" data-title="x-ray sdk deprecated adot application signals ecs otel cloudwatch">
+  <div class="card-header"><div class="card-meta"><span class="cat-badge cat-Observability">Observability</span><span class="sdk-tag">App Signals</span></div><div class="card-title">ECS Distributed Tracing</div></div>
+  <div class="code-split">
+    <div class="code-pane old"><div class="code-pane-label">✕ Old (X-Ray SDK — deprecated ⚠️)</div><pre><span class="cm">// Maintenance mode Feb 2026</span>
+<span class="kw">@Bean</span>
+<span class="kw">public</span> <span class="cl">Filter</span> <span class="fn">tracingFilter</span>(){
+  <span class="kw">return new</span>
+    <span class="cl">AWSXRayServletFilter</span>(
+      <span class="st">"OrderService"</span>);
+}
+<span class="cm">// X-Ray only, no OTel</span>
+<span class="cm">// Manual segment mgmt</span></pre></div>
+    <div class="code-pane new"><div class="code-pane-label">✓ Modern (ADOT + App Signals)</div><pre><span class="cm">// Task definition env vars:</span>
+<span class="cm">// JAVA_TOOL_OPTIONS=</span>
+<span class="cm">//  -javaagent:/adot/agent.jar</span>
+<span class="cm">// OTEL_AWS_APPLICATION</span>
+<span class="cm">//   _SIGNALS_ENABLED=true</span>
+<span class="cm">// OTEL_PROPAGATORS=</span>
+<span class="cm">//   xray,tracecontext,baggage</span>
+<span class="cm">// Console: CloudWatch →</span>
+<span class="cm">// Application Signals (APM)</span>
+<span class="cm">// → Trace Map ✓</span></pre></div>
+  </div>
+</div>
+
+<div class="card" data-cat="Observability" data-title="xray annotations searchable span attributes otel aws array">
+  <div class="card-header"><div class="card-meta"><span class="cat-badge cat-Observability">Observability</span><span class="sdk-tag">X-Ray Annotations</span></div><div class="card-title">Searchable Trace Annotations</div></div>
+  <div class="code-split">
+    <div class="code-pane old"><div class="code-pane-label">✕ Old (X-Ray SDK)</div><pre><span class="cm">// Annotations = searchable</span>
+<span class="cl">AWSXRay</span>.<span class="fn">getCurrentSegment</span>()
+  .<span class="fn">putAnnotation</span>(
+    <span class="st">"customerId"</span>,
+    customerId);
+
+<span class="cm">// Metadata = not searchable</span>
+<span class="cl">AWSXRay</span>.<span class="fn">getCurrentSegment</span>()
+  .<span class="fn">putMetadata</span>(
+    <span class="st">"order"</span>, orderObj);</pre></div>
+    <div class="code-pane new"><div class="code-pane-label">✓ Modern (OTel span attributes)</div><pre><span class="kw">import static</span>
+  io.opentelemetry.api.common
+  .AttributeKey.stringArrayKey;
+
+<span class="cm">// setAttribute = metadata</span>
+<span class="cm">// aws.xray.annotations =</span>
+<span class="cm">// searchable annotations</span>
+<span class="cl">Span</span>.<span class="fn">current</span>()
+  .<span class="fn">setAttribute</span>(
+    <span class="st">"order.customer_id"</span>, id)
+  .<span class="fn">setAttribute</span>(
+    <span class="fn">stringArrayKey</span>(
+      <span class="st">"aws.xray.annotations"</span>),
+    <span class="cl">List</span>.<span class="fn">of</span>(
+      <span class="st">"order.customer_id"</span>));
+<span class="cm">// Filter by annotation ✓</span></pre></div>
+  </div>
+</div>
+
+<div class="card" data-cat="Observability" data-title="cloudwatch emf embedded metric format lambda powertools no api call">
+  <div class="card-header"><div class="card-meta"><span class="cat-badge cat-Observability">Observability</span><span class="sdk-tag">EMF</span></div><div class="card-title">Custom CloudWatch Metrics</div></div>
+  <div class="code-split">
+    <div class="code-pane old"><div class="code-pane-label">✕ Old (PutMetricData API call)</div><pre><span class="cm">// Extra API call per metric!</span>
+<span class="cl">PutMetricDataRequest</span> r <span class="kw">=</span>
+  <span class="kw">new</span> <span class="cl">PutMetricDataRequest</span>()
+  .<span class="fn">withNamespace</span>(
+    <span class="st">"MyApp/Orders"</span>)
+  .<span class="fn">withMetricData</span>(<span class="kw">new</span>
+    <span class="cl">MetricDatum</span>()
+    .<span class="fn">withMetricName</span>(
+      <span class="st">"OrderProcessed"</span>)
+    .<span class="fn">withValue</span>(1.0)
+    .<span class="fn">withUnit</span>(
+      <span class="cl">StandardUnit</span>.Count));
+cw.<span class="fn">putMetricData</span>(r);</pre></div>
+    <div class="code-pane new"><div class="code-pane-label">✓ Modern (EMF via stdout)</div><pre><span class="kw">@Metrics</span>(namespace<span class="kw">=</span>
+  <span class="st">"MyApp/Orders"</span>)
+<span class="kw">public class</span> <span class="cl">Handler</span> {
+
+  <span class="cl">MetricsLogger</span> m <span class="kw">=</span>
+    <span class="cl">MetricsUtils</span>
+      .<span class="fn">metricsLogger</span>();
+
+  m.<span class="fn">putDimensions</span>(
+    <span class="cl">DimensionSet</span>.<span class="fn">of</span>(
+      <span class="st">"Service"</span>,<span class="st">"Orders"</span>));
+  m.<span class="fn">putMetric</span>(
+    <span class="st">"OrderProcessed"</span>,
+    1, <span class="cl">Unit</span>.COUNT);
+  <span class="cm">// Via CW Logs — free ✓</span>
+}</pre></div>
+  </div>
+</div>
+
+<div class="card" data-cat="Observability" data-title="cloudwatch logs insights structured json query filter stats">
+  <div class="card-header"><div class="card-meta"><span class="cat-badge cat-Observability">Observability</span><span class="sdk-tag">Logs Insights</span></div><div class="card-title">Log Querying</div></div>
+  <div class="code-split">
+    <div class="code-pane old"><div class="code-pane-label">✕ Old (grep on unstructured)</div><pre><span class="cm">// Plain text logs</span>
+log.<span class="fn">info</span>(<span class="st">"Order 123 processed"</span>
+  <span class="kw">+</span> <span class="st">" for CUST-456 in 45ms"</span>);
+
+<span class="cm">// Query = regex nightmare:</span>
+<span class="cm">// filter @message like</span>
+<span class="cm">// /Order.*processed/</span>
+<span class="cm">// | parse @message</span>
+<span class="cm">// "Order * processed"</span>
+<span class="cm">// as orderId</span></pre></div>
+    <div class="code-pane new"><div class="code-pane-label">✓ Modern (JSON → clean Insights)</div><pre><span class="cm">// Powertools outputs JSON:</span>
+<span class="cm">// {"orderId":"123",</span>
+<span class="cm">//  "customerId":"C456",</span>
+<span class="cm">//  "durationMs":45}</span>
+
+<span class="cm">// Logs Insights query:</span>
+<span class="cm">// fields orderId,</span>
+<span class="cm">//   customerId, durationMs</span>
+<span class="cm">// | filter durationMs > 100</span>
+<span class="cm">// | stats avg(durationMs)</span>
+<span class="cm">//     by customerId</span>
+<span class="cm">// Clean, no regex ✓</span></pre></div>
+  </div>
+</div>
+
+<!-- Spring -->
+<div class="section-label" data-cat="Spring"><span class="section-label-text">Spring</span><div class="section-label-line"></div></div>
+
+<div class="card" data-cat="Spring" data-title="spring cloud aws autoconfigure s3 sqs sns beans auto inject">
+  <div class="card-header"><div class="card-meta"><span class="cat-badge cat-Spring">Spring</span><span class="sdk-tag">Spring Cloud AWS v3</span></div><div class="card-title">Auto-configured AWS Beans</div></div>
+  <div class="code-split">
+    <div class="code-pane old"><div class="code-pane-label">✕ Old (manual @Bean per service)</div><pre><span class="kw">@Configuration</span>
+<span class="kw">public class</span> <span class="cl">AwsConfig</span> {
+
+  <span class="kw">@Bean</span>
+  <span class="kw">public</span> <span class="cl">AmazonS3</span> <span class="fn">s3</span>() {
+    <span class="kw">return</span>
+      <span class="cl">AmazonS3ClientBuilder</span>
+        .<span class="fn">standard</span>()
+        .<span class="fn">withRegion</span>(
+          <span class="st">"us-east-1"</span>)
+        .<span class="fn">build</span>();
+  }
+  <span class="cm">// Repeat for SQS, SNS, DB...</span>
+}</pre></div>
+    <div class="code-pane new"><div class="code-pane-label">✓ Modern (zero config)</div><pre><span class="cm"># application.yml:</span>
+<span class="cm"># spring.cloud.aws.region</span>
+<span class="cm">#   .static: us-east-1</span>
+
+<span class="cm">// Inject directly:</span>
+<span class="kw">@Autowired</span> <span class="cl">S3Client</span> s3;
+<span class="kw">@Autowired</span> <span class="cl">SqsTemplate</span> sqs;
+<span class="kw">@Autowired</span> <span class="cl">SnsTemplate</span> sns;
+
+<span class="cm">// All auto-configured</span>
+<span class="cm">// with IAM role creds ✓</span></pre></div>
+  </div>
+</div>
+
+<div class="card" data-cat="Spring" data-title="sqs listener annotation spring cloud aws polling auto delete deserialize">
+  <div class="card-header"><div class="card-meta"><span class="cat-badge cat-Spring">Spring</span><span class="sdk-tag">@SqsListener</span></div><div class="card-title">SQS Message Listener</div></div>
+  <div class="code-split">
+    <div class="code-pane old"><div class="code-pane-label">✕ Old (manual polling loop)</div><pre><span class="kw">@Scheduled</span>(fixedDelay<span class="kw">=</span>1000)
+<span class="kw">public void</span> <span class="fn">poll</span>() {
+  <span class="kw">var</span> r <span class="kw">=</span> sqs
+    .<span class="fn">receiveMessage</span>(url);
+  <span class="kw">for</span> (<span class="kw">var</span> m :
+    r.<span class="fn">getMessages</span>()) {
+    process(m.<span class="fn">getBody</span>());
+    sqs.<span class="fn">deleteMessage</span>(url,
+      m.<span class="fn">getReceiptHandle</span>());
+  }
+}</pre></div>
+    <div class="code-pane new"><div class="code-pane-label">✓ Modern (@SqsListener)</div><pre><span class="kw">@Component</span>
+<span class="kw">public class</span>
+  <span class="cl">OrderListener</span> {
+
+  <span class="kw">@SqsListener</span>(
+    <span class="st">"order-events-queue"</span>)
+  <span class="kw">public void</span> <span class="fn">onOrder</span>(
+    <span class="cl">OrderEvent</span> event) {
+    <span class="cm">// Auto-deserialized ✓</span>
+    <span class="cm">// Auto-deleted ✓</span>
+    <span class="cm">// DLQ on exception ✓</span>
+    process(event);
+  }
+}</pre></div>
+  </div>
+</div>
+
+<div class="card" data-cat="Spring" data-title="spring boot 4 opentelemetry starter observed auto tracing">
+  <div class="card-header"><div class="card-meta"><span class="cat-badge cat-Spring">Spring</span><span class="sdk-tag">Spring Boot 4</span></div><div class="card-title">Observability Auto-config</div></div>
+  <div class="code-split">
+    <div class="code-pane old"><div class="code-pane-label">✕ Old (Sleuth, Boot 2.x)</div><pre><span class="cm">// spring-cloud-sleuth</span>
+<span class="cm">// Removed in Boot 3+</span>
+<span class="kw">@Bean</span>
+<span class="kw">public</span> <span class="cl">Tracer</span> <span class="fn">tracer</span>() {
+  <span class="kw">return new</span>
+    <span class="cl">BraveTracer</span>(...);
+}
+<span class="cm">// Zipkin or X-Ray only</span>
+<span class="cm">// No OTel compatibility</span></pre></div>
+    <div class="code-pane new"><div class="code-pane-label">✓ Modern (Boot 4 + OTel)</div><pre><span class="cm"># pom.xml:</span>
+<span class="cm"># spring-boot-starter-</span>
+<span class="cm">#   opentelemetry</span>
+<span class="cm">#</span>
+<span class="cm"># management.otlp.tracing</span>
+<span class="cm">#   .endpoint: http://</span>
+<span class="cm">#   localhost:4316/v1/traces</span>
+
+<span class="cm">// Custom spans:</span>
+<span class="kw">@Observed</span>(name<span class="kw">=</span>
+  <span class="st">"order.process"</span>)
+<span class="kw">public void</span> <span class="fn">process</span>(...) {}
+<span class="cm">// HTTP+DB+Messaging ✓</span></pre></div>
+  </div>
+</div>
+
+</div><!-- /grid -->
+
+<footer>
+  <p>java<span style="color:var(--text-dim)">.</span><span style="color:var(--aws)">aws</span> &nbsp;·&nbsp; Inspired by <a href="https://javaevolved.github.io" target="_blank">javaevolved.github.io</a> &nbsp;·&nbsp; Built for Java developers on AWS &nbsp;·&nbsp; By <a href="https://medium.com/@aarkay89" target="_blank">Karthik Renganathan</a></p>
+</footer>
+
+<script>
+  let activeFilter = 'All';
+  function toggleTheme() {
+    const html = document.documentElement;
+    const isDark = html.dataset.theme === 'dark';
+    html.dataset.theme = isDark ? 'light' : 'dark';
+    document.getElementById('theme-btn').textContent = isDark ? '☾ dark' : '☀ light';
+  }
+  function setFilter(cat, btn) {
+    activeFilter = cat;
+    document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+    filterCards();
+  }
+  function filterCards() {
+    const q = document.getElementById('search').value.toLowerCase();
+    const cards = document.querySelectorAll('.card');
+    const sections = document.querySelectorAll('.section-label');
+    let visible = 0;
+    const oldEmpty = document.querySelector('.empty');
+    if (oldEmpty) oldEmpty.remove();
+    cards.forEach(card => {
+      const cat = card.dataset.cat;
+      const match = (activeFilter === 'All' || cat === activeFilter) &&
+        (!q || (card.dataset.title || '').includes(q) || card.innerText.toLowerCase().includes(q));
+      card.style.display = match ? '' : 'none';
+      if (match) visible++;
+    });
+    sections.forEach(sec => {
+      const cat = sec.dataset.cat;
+      const anyVisible = [...document.querySelectorAll('.card[data-cat="' + cat + '"]')].some(c => c.style.display !== 'none');
+      sec.style.display = (activeFilter === 'All' || activeFilter === cat) && anyVisible ? '' : 'none';
+    });
+    document.getElementById('count-badge').textContent = visible + ' pattern' + (visible !== 1 ? 's' : '');
+    if (visible === 0) {
+      const empty = document.createElement('div');
+      empty.className = 'empty';
+      empty.innerHTML = '<span class="empty-icon">⌕</span>No patterns found for "' + document.getElementById('search').value + '"';
+      document.getElementById('grid').appendChild(empty);
+    }
+  }
+</script>
+</body>
+</html>
